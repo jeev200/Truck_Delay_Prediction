@@ -4,3 +4,8 @@ matplotlib
 seaborn
 sqlalchemy
 psycopg2-binary
+requests
+scikit-learn
+warnings
+hopsworks
+traceback

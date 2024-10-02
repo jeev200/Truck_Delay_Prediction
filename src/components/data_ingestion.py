@@ -1,47 +1,31 @@
+import os
+import requests
 import pandas as pd
-import psycopg2
 from sqlalchemy import create_engine
-from sqlalchemy import text
+from io import StringIO 
+import configparser
 
 class PostgreSQLIngestion:
     def __init__(self, db_config):
         self.db_config = db_config
-        self.engine = None
 
-    def connect(self):
+    def fetch_github_raw_files(self, source_url):
+        response = requests.get(source_url)
+        if response.status_code == 200:
+            files = response.json()
+            return [file['download_url'] for file in files if file['name'].endswith('.csv')]
+        else:
+            raise Exception(f"Failed to fetch files from GitHub. Status code: {response.status_code}")
+
+    def upload_to_postgres(self, engine, file_url, table_name):
+        
         try:
-            self.engine = create_engine(f"postgresql://{self.db_config['user']}:{self.db_config['password']}@{self.db_config['host']}:{self.db_config['port']}/{self.db_config['dbname']}")
-            print("Database connection successful.")
+            print(f"Uploading file {file_url} to PostgreSQL table {table_name}...")
+            response = requests.get(file_url, verify=False)  # Verify can be set to False for testing
+            response.raise_for_status()  # Raise an error for bad responses
+            df = pd.read_csv(StringIO(response.text))  # Use StringIO from io module
+            print(f"Data from {file_url}:\n{df.head()}")  # Debugging: Check if data is loaded correctly
+            df.to_sql(table_name, engine, if_exists='replace', index=False)
+            print(f"Data from {file_url} uploaded to table {table_name}")
         except Exception as e:
-            print(f"Error connecting to PostgreSQL database: {e}")
-            raise
-
-    def upsert_data(self, data, table_name):
-        try:
-            data.to_sql(table_name, self.engine, index=False, if_exists='replace')
-            print(f"Data upserted into {table_name} successfully.")
-        except Exception as e:
-            print(f"Error upserting data into table {table_name}: {e}")
-
-    def fetch_data(self, table_name):
-        try:
-            query = f"SELECT * FROM {table_name}"
-            return pd.read_sql_query(query, self.engine)
-        except Exception as e:
-            print(f"Error fetching data from table {table_name}: {e}")
-            return None
-
-    def get_table_names(self):
-        try:
-            query = text("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
-            with self.engine.connect() as connection:
-                result = connection.execute(query)
-                return [row[0] for row in result]  # Access the first item in each tuple
-        except Exception as e:
-            print(f"Error fetching table names: {e}")
-            return []
-
-    def close(self):
-        if self.engine:
-            self.engine.dispose()
-        print("Database connection closed.")
+            print(f"Error uploading data from {file_url} to table {table_name}: {e}")

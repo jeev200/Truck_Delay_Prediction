@@ -1,86 +1,51 @@
 import os
 import sys
 import configparser
-import pandas as pd
-import requests
-import io
 
-# Add the src directory to the Python path
 parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_directory)
 
-# Import the ingestion component
+from src.utils.config_utils import *
+from src.utils.db_utlis import * 
+
 from src.components.data_ingestion import PostgreSQLIngestion
 
-def read_config(config_file=None):
-    if config_file is None:
-        # Construct the path to config.ini relative to the script location
-        config_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'config', 'config.ini'))
+class DataIngestionPipeline:
     
-    print(f"Attempting to read config file at: {config_file}")
-    config = configparser.ConfigParser()
-    if not os.path.isfile(config_file):
-        print(f"Config file not found: {config_file}")
-        return None
-    config.read(config_file)
-    print("Config sections:", config.sections())
-    return config
+    def __init__(self):
+        self.config = read_config()
 
-def download_github_data(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        return pd.read_csv(io.StringIO(response.text))
-    else:
-        print(f"Failed to download data from {url}")
-        return None
+    def main(self):
+        print("Starting data ingestion...")
 
-def run_ingestion_pipeline():
-    print("Current working directory:", os.getcwd())
-    config = read_config()
+        try:
+            
+            db_config = get_db_config(self.config)
+            source_url = self.config['DATA']['source_url'].strip()
+            ingestion = PostgreSQLIngestion(db_config)
+            engine = connect_to_db(db_config)
+            csv_files = ingestion.fetch_github_raw_files(source_url)
 
-    if config is None:
-        print("Failed to read config file.")
-        return
+           
+            for file_url in csv_files:
+                table_name = file_url.split('/')[-1].replace('.csv', '')
+                ingestion.upload_to_postgres(engine, file_url, table_name)
 
-    db_config = {
-        'host': config['POSTGRESQL']['host'].strip(),
-        'port': int(config['POSTGRESQL']['port'].strip()),
-        'dbname': config['POSTGRESQL']['dbname'].strip(),
-        'user': config['POSTGRESQL']['user'].strip(),
-        'password': config['POSTGRESQL']['password'].strip()
-    }
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            raise e
 
-    ingestion = PostgreSQLIngestion(db_config)
-    ingestion.connect()
+        finally:
+            close_db_connection(engine)
 
-    table_dataframes = {}  # Dictionary to store dataframes
 
-    for key in config['GITHUB_DATA']:
-        data = download_github_data(config['GITHUB_DATA'][key].strip())
-        if data is not None:
-            table_name = key.replace('_url', '')
-            ingestion.upsert_data(data, table_name)
-
-    tables = ingestion.get_table_names()
-
-    if tables:
-        for table in tables:
-            data = ingestion.fetch_data(table)
-            if data is not None:
-                table_dataframes[table] = data  # Store dataframe in dictionary
-                print(f"Data from table {table} loaded into memory.")
-
-    ingestion.close()
-
-    return table_dataframes  # Return the dictionary containing all dataframes
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
-        print("Ingestion pipeline started")
-        data_frames = run_ingestion_pipeline()
-        print("Ingestion pipeline ran successfully.")
-        # Example usage of data_frames
-        print(data_frames.keys())  # To list all table names which have been converted to dataframes
+        STAGE_NAME = "Data Ingestion"
+        print(f">>>>>> Stage {STAGE_NAME} started <<<<<<")
+        pipeline = DataIngestionPipeline()
+        pipeline.main()
+        print(f">>>>>> Stage {STAGE_NAME} completed <<<<<<")
     except Exception as e:
-        print(f"Failed to complete the ingestion pipeline: {str(e)}")
-    
+        print(f"An error occurred: {e}")
+        raise e
