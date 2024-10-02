@@ -188,18 +188,17 @@ class DataProcessingPipeline:
                 lambda row: self.merger.has_midnight(row['departure_date'], row['estimated_arrival']),
                 axis=1
                 )
-                final_merge_dataset = self.merger.remove_duplicates(final_merge_dataset)
                 final_merge_dataset = self.merger.remove_rows_with_nulls(final_merge_dataset)
-                print('The final_merge_dataset shape ',final_merge_dataset.shape)
+             
                 
                 columns_to_remove = ['date','city_id_origin', 'city_id_destination', 
                                     'datetime_origin','datetime_destination']
                 final_merge_dataset = self.merger.drop_columns(final_merge_dataset, columns_to_remove)
                 
-                final_merge_dataset = final_merge_dataset.drop_duplicates()
+                final_merge_dataset = self.merger.remove_duplicates(final_merge_dataset)
                 
                 final_merge_dataset = self.merger.add_sequential_id(final_merge_dataset)
-                
+                print('The final_merge_dataset shape ',final_merge_dataset.shape)
                 print("The Final merge data columns are ",final_merge_dataset.columns)
                 
                 # Define the output file path
