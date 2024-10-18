@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/401338667180179893/cb4752fd19b34c0db84945c5f4934954/artifacts
+end_time: 1729136413407
+entry_point_name: ''
+experiment_id: '401338667180179893'
+lifecycle_stage: active
+run_id: cb4752fd19b34c0db84945c5f4934954
+run_name: Logistic Regression
+run_uuid: cb4752fd19b34c0db84945c5f4934954
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1729136411417
+status: 3
+tags: []
+user_id: jeevanapathipati

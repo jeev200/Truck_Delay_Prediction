@@ -70,7 +70,7 @@ class DataIngestionAndCleaning:
         #     'truck_schedule_table', 'trucks_table', 'drivers_table', 'routes_table'
         # ]
         # delete_feature_groups(self.hopsworks_api_key, feature_group_names, version)
-        # print(">>>>>> Feature Group Deletion Completed <<<<<<")
+        # # print(">>>>>> Feature Group Deletion Completed <<<<<<")
         
         create_or_update_feature_groups_in_hopsworks(self.hopsworks_api_key, cleaned_data, version)
         

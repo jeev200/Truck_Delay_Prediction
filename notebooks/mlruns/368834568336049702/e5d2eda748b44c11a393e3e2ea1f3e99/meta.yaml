@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/notebooks/mlruns/368834568336049702/e5d2eda748b44c11a393e3e2ea1f3e99/artifacts
+end_time: 1728937435572
+entry_point_name: ''
+experiment_id: '368834568336049702'
+lifecycle_stage: active
+run_id: e5d2eda748b44c11a393e3e2ea1f3e99
+run_name: rare-bass-30
+run_uuid: e5d2eda748b44c11a393e3e2ea1f3e99
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728937435555
+status: 3
+tags: []
+user_id: jeevanapathipati

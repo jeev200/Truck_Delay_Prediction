@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/notebooks/mlruns/368834568336049702/55a3a6ae82d84cfcbce99c842e94cdf9/artifacts
+end_time: 1728970045257
+entry_point_name: ''
+experiment_id: '368834568336049702'
+lifecycle_stage: active
+run_id: 55a3a6ae82d84cfcbce99c842e94cdf9
+run_name: Random Forest with SMOTE and Undersampling
+run_uuid: 55a3a6ae82d84cfcbce99c842e94cdf9
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728970041159
+status: 3
+tags: []
+user_id: jeevanapathipati

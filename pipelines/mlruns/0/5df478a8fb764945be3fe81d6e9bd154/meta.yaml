@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/0/5df478a8fb764945be3fe81d6e9bd154/artifacts
+end_time: 1729009570769
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 5df478a8fb764945be3fe81d6e9bd154
+run_name: XGBoost
+run_uuid: 5df478a8fb764945be3fe81d6e9bd154
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1729009556947
+status: 3
+tags: []
+user_id: jeevanapathipati

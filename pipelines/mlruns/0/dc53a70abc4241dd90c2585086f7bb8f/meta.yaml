@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/0/dc53a70abc4241dd90c2585086f7bb8f/artifacts
+end_time: 1728950290101
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: dc53a70abc4241dd90c2585086f7bb8f
+run_name: classy-skink-104
+run_uuid: dc53a70abc4241dd90c2585086f7bb8f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728950276667
+status: 3
+tags: []
+user_id: jeevanapathipati

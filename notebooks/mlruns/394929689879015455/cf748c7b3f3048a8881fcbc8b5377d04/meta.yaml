@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/notebooks/mlruns/394929689879015455/cf748c7b3f3048a8881fcbc8b5377d04/artifacts
+end_time: 1728936064815
+entry_point_name: ''
+experiment_id: '394929689879015455'
+lifecycle_stage: active
+run_id: cf748c7b3f3048a8881fcbc8b5377d04
+run_name: traveling-calf-604
+run_uuid: cf748c7b3f3048a8881fcbc8b5377d04
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728936039131
+status: 3
+tags: []
+user_id: jeevanapathipati

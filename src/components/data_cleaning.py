@@ -43,19 +43,21 @@ class DataCleaner:
    
     def remove_outliers(self, df, table_name):
         exclusions = {
-            'city_weather': ['precip', 'visibility'],  
-            'routes_weather': ['precip', 'visibility'],  
-            'drivers_table': ['vehicle_no'],  
-            'trucks_table': ['truck_id', 'load_capacity_pounds', 'mileage_mpg', 'fuel_type'],  
-            'truck_schedule_table': []  
+            'city_weather': ['precip', 'visibility'],
+            'routes_weather': ['precip', 'visibility'],
+            'drivers_table': ['vehicle_no'],
+            'trucks_table': ['truck_id', 'load_capacity_pounds', 'mileage_mpg', 'fuel_type'],
+            'truck_schedule_table': [],
+            'traffic_table': ['accident']  # Excluding 'accident' from outlier removal
         }
 
         excluded_columns = exclusions.get(table_name, [])
         print(f"Excluding columns for {table_name}: {excluded_columns}")
-        if table_name in ['trucks_table']:  
+        
+        if table_name in ['trucks_table']:
             target_columns = ['truck_age']
-        elif table_name == 'truck_schedule_table':
-            return df  
+        elif table_name == 'truck_schedule_table' or table_name == 'traffic_table':
+            return df  # Skip outlier removal for 'truck_schedule_table' and 'traffic_table'
         else:
             target_columns = [col for col in df.columns if col not in excluded_columns and df[col].dtype.kind in 'biufc']
 
@@ -70,6 +72,7 @@ class DataCleaner:
             print(f"Outliers removed from {column} in {table_name}.")
 
         return df
+
 
 
     def exp(self, df):

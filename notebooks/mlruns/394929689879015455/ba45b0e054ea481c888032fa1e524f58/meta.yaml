@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/notebooks/mlruns/394929689879015455/ba45b0e054ea481c888032fa1e524f58/artifacts
+end_time: 1728938147881
+entry_point_name: ''
+experiment_id: '394929689879015455'
+lifecycle_stage: active
+run_id: ba45b0e054ea481c888032fa1e524f58
+run_name: dapper-sheep-432
+run_uuid: ba45b0e054ea481c888032fa1e524f58
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728938125839
+status: 3
+tags: []
+user_id: jeevanapathipati

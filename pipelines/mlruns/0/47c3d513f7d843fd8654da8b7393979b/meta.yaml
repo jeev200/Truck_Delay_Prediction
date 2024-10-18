@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/0/47c3d513f7d843fd8654da8b7393979b/artifacts
+end_time: 1728946201706
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 47c3d513f7d843fd8654da8b7393979b
+run_name: Random Forest
+run_uuid: 47c3d513f7d843fd8654da8b7393979b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728946200783
+status: 4
+tags: []
+user_id: jeevanapathipati

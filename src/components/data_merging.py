@@ -1,6 +1,8 @@
 import pandas as pd
 import hopsworks
 import numpy as np
+import os
+from datetime import datetime
 
 class DataMerger:
     def __init__(self, hopsworks_api_key):
@@ -142,19 +144,12 @@ class DataMerger:
     def has_midnight(self, start, end):
         return int(start.date() != end.date())
     
-    def add_sequential_id(self, df, id_column_name='id'):
-        
+    def add_sequential_id(self, df, id_column_name='index'):
+        # Add a sequential ID column
         df[id_column_name] = range(1, len(df) + 1)
+        
+        # Add an eventtime column with today's date
+        df['eventtime'] = pd.to_datetime(datetime.now().date())
+        
         return df
-
-
-                
-            
-            
-            
-            
-            
-            
-            
-            
-   
+    

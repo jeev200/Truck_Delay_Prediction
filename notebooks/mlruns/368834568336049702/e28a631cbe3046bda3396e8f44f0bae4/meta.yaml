@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/notebooks/mlruns/368834568336049702/e28a631cbe3046bda3396e8f44f0bae4/artifacts
+end_time: 1729007653455
+entry_point_name: ''
+experiment_id: '368834568336049702'
+lifecycle_stage: active
+run_id: e28a631cbe3046bda3396e8f44f0bae4
+run_name: Random Forest with Class Weight
+run_uuid: e28a631cbe3046bda3396e8f44f0bae4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1729007641608
+status: 3
+tags: []
+user_id: jeevanapathipati

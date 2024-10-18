@@ -16,6 +16,7 @@ class DataProcessingPipeline:
         self.config = read_config()
         self.hopsworks_api_key = self.config.get('HOPSWORK', 'feature_group_api')
         self.merger = DataMerger(hopsworks_api_key=self.hopsworks_api_key)
+        self.model_dir = self.config.get('MODEL', 'model_dir')
 
     def main(self):
         feature_group_names = [
@@ -196,16 +197,24 @@ class DataProcessingPipeline:
                 final_merge_dataset = self.merger.drop_columns(final_merge_dataset, columns_to_remove)
                 
                 final_merge_dataset = self.merger.remove_duplicates(final_merge_dataset)
-                
-                final_merge_dataset = self.merger.add_sequential_id(final_merge_dataset)
+            
                 print('The final_merge_dataset shape ',final_merge_dataset.shape)
                 print("The Final merge data columns are ",final_merge_dataset.columns)
                 
-                # Define the output file path
-                output_csv_path = "/Users/jeevanapathipati/Documents/TruckDelay/datasets/final_merge_dataset.csv"
-
-                # Save the final DataFrame to CSV
-                final_merge_dataset.to_csv(output_csv_path, index=False)
+                
+                final_merge_dataset = self.merger.add_sequential_id(final_merge_dataset)
+                
+                # feature_group_names = [
+                #     'final_preprocessed_data'
+                # ]
+                # delete_feature_groups(self.hopsworks_api_key, feature_group_names, version=1)
+               
+                create_or_update_feature_groups_in_hopsworks(
+                    hopsworks_api_key=self.hopsworks_api_key,
+                    cleaned_data={'final_dataset': final_merge_dataset},
+                    version=1
+                )
+                print("Feature group creation/update completed.")
             
 
 if __name__ == "__main__":

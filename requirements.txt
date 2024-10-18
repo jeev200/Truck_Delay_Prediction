@@ -5,7 +5,5 @@ seaborn
 sqlalchemy
 psycopg2-binary
 requests
-scikit-learn
-warnings
+scikit-learn==1.5.2
 hopsworks
-traceback

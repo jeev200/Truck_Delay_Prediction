@@ -1,6 +1,8 @@
 import time
 import hopsworks
 import pandas as pd
+import traceback
+import hsfs
 
 feature_descriptions = {
     "city_weather": [
@@ -67,7 +69,7 @@ feature_descriptions = {
     "routes_weather": [
         {"name": "index", "description": "unique identification for each weather record on the route"},
         {"name": "route_id", "description": "unique identification for each route"},
-        {"name": "datetime", "description": "date and time of the weather observation"},
+        {"name": "date", "description": "date and time of the weather observation"},
         {"name": "temp", "description": "temperature at the time of the weather observation, in Fahrenheit"},
         {"name": "wind_speed", "description": "wind speed during the observation, in miles per hour"},
         {"name": "description", "description": "brief description of the weather condition (e.g., Sunny, Rain Shower)"},
@@ -79,7 +81,6 @@ feature_descriptions = {
     ]
 }
 
-
 def create_or_update_feature_groups_in_hopsworks(hopsworks_api_key, cleaned_data, version=1, retries=3, delay=60):
     try:
         # Log into Hopsworks and get the feature store
@@ -87,7 +88,7 @@ def create_or_update_feature_groups_in_hopsworks(hopsworks_api_key, cleaned_data
         fs = project.get_feature_store()
 
         for table_name, df in cleaned_data.items():
-            # Convert 'eventtime' column to date format if it exists
+            # Ensure 'eventtime' column is mapped correctly, assuming it already exists in the DataFrame
             if 'eventtime' in df.columns and pd.api.types.is_datetime64_any_dtype(df['eventtime']):
                 df['eventtime'] = df['eventtime'].dt.date
 
@@ -98,9 +99,6 @@ def create_or_update_feature_groups_in_hopsworks(hopsworks_api_key, cleaned_data
                     feature_group = fs.get_feature_group(name=table_name, version=version)
                     print(f"Feature group '{table_name}' (version {version}) already exists.")
 
-                    # Insert new data into the existing feature group
-                    feature_group.insert(df)
-                    print(f"Data inserted into existing feature group '{table_name}' (version {version}).")
                     break  # Stop retrying after successful insert
 
                 except Exception as e:
@@ -117,6 +115,7 @@ def create_or_update_feature_groups_in_hopsworks(hopsworks_api_key, cleaned_data
                                 name=table_name,
                                 version=version,
                                 primary_key=primary_key,
+                                event_time='eventtime',  # Map the existing 'eventtime' column as the event time
                                 description=f"Created feature group for {table_name}.",
                                 online_enabled=False  # Adjust based on your requirements
                             )
@@ -155,37 +154,152 @@ def create_or_update_feature_groups_in_hopsworks(hopsworks_api_key, cleaned_data
         print(f"General error during feature group management: {e}")
         raise
 
+# def create_or_update_feature_groups_in_hopsworks(hopsworks_api_key, cleaned_data, version=1, retries=3, delay=60):
+#     try:
+#         # Log into Hopsworks and get the feature store
+#         project = hopsworks.login(api_key_value=hopsworks_api_key)
+#         fs = project.get_feature_store()
 
-def delete_feature_groups(hopsworks_api_key, feature_group_names, version=1):
+#         for table_name, df in cleaned_data.items():
+#             if 'eventtime' in df.columns and pd.api.types.is_datetime64_any_dtype(df['eventtime']):
+#                 df['eventtime'] = df['eventtime'].dt.date
+
+#             attempts = 0
+#             while attempts < retries:
+#                 try:
+#                     # Try to get the existing feature group
+#                     feature_group = fs.get_feature_group(name=table_name, version=version)
+#                     print(f"Feature group '{table_name}' (version {version}) already exists.")
+                    
+#                     # Insert new data into the existing feature group
+#                     feature_group.insert(df)
+#                     print(f"Data inserted into existing feature group '{table_name}' (version {version}).")
+#                     break  # Stop retrying after successful insert
+
+#                 except Exception as e:
+#                     # Log the error and retry if it's a parallel execution limit error
+#                     if "Parallel executions quota reached" in str(e) or "500" in str(e):
+#                         attempts += 1
+#                         delay_time = delay * (2 ** (attempts - 1))  # Exponential backoff
+#                         print(f"Retry {attempts}/{retries} for {table_name} due to parallel execution limits. Waiting for {delay_time} seconds.")
+#                         time.sleep(delay_time)  # Wait before retrying
+#                     elif "Could not find" in str(e) or "Not Found" in str(e):
+#                         if attempts == 0:  # Attempt creation only once
+#                             # Creating new feature group
+#                             primary_key = ['index']  # Assuming 'index' is the primary key
+#                             feature_group = fs.create_feature_group(
+#                                 name=table_name,
+#                                 version=version,
+#                                 primary_key=primary_key,
+#                                 event_time='eventtime',
+#                                 description=f"Created feature group for {table_name}.",
+#                                 online_enabled=False
+#                             )
+#                             feature_group.save(df)
+#                             print(f"New feature group '{table_name}' created and data saved.")
+#                             break
+#                     else:
+#                         print(f"Unexpected error for '{table_name}': {e}")
+#                         break
+#                 if attempts >= retries:
+#                     print(f"Failed to create feature group '{table_name}' after {retries} attempts.")
+#                     break
+
+#     except Exception as e:
+#         print(f"General error during feature group management: {e}")
+#         raise
+
+
+
+
+# def delete_feature_groups(hopsworks_api_key, feature_group_names, version=1):
+#     try:
+#         project = hopsworks.login(api_key_value=hopsworks_api_key)
+#         fs = project.get_feature_store()
+
+#         for name in feature_group_names:
+#             try:
+#                 feature_group = fs.get_feature_group(name, version=version)
+#                 feature_group.delete()
+#                 print(f"Deleted feature group: {name} version {version}")
+#             except Exception as e:
+#                 print(f"Error deleting feature group {name} version {version}: {e}")
+#     except Exception as e:
+#         print(f"Error during feature group deletion process: {e}")
+#         raise
+def delete_feature_groups(hopsworks_api_key, feature_group_names, version=1, retry_attempts=3):
     try:
+        # Login to Hopsworks using the API key
         project = hopsworks.login(api_key_value=hopsworks_api_key)
         fs = project.get_feature_store()
 
         for name in feature_group_names:
-            try:
-                feature_group = fs.get_feature_group(name, version=version)
-                feature_group.delete()
-                print(f"Deleted feature group: {name} version {version}")
-            except Exception as e:
-                print(f"Error deleting feature group {name} version {version}: {e}")
+            attempt = 0
+            while attempt < retry_attempts:
+                try:
+                    # Try to get and delete the feature group
+                    feature_group = fs.get_feature_group(name, version=version)
+                    feature_group.delete()
+                    print(f"Deleted feature group: {name} version {version}")
+                    break  # Exit loop if deletion is successful
+                except Exception as e:
+                    attempt += 1
+                    print(f"Error deleting feature group {name} version {version} on attempt {attempt}: {e}")
+                    if attempt >= retry_attempts:
+                        print(f"Failed to delete feature group {name} after {retry_attempts} attempts.")
+                    else:
+                        print("Retrying in 60 seconds...")
+                        time.sleep(60)  # Wait for 5 seconds before retrying
     except Exception as e:
         print(f"Error during feature group deletion process: {e}")
         raise
 
 
-def fetch_feature_groups(hopsworks_api_key, group_names, version=1):
+# def fetch_feature_groups(hopsworks_api_key, group_names, version=1):
+#     try:
+#         project = hopsworks.login(api_key_value=hopsworks_api_key)
+#         fs = project.get_feature_store()
+#         feature_groups = {}
+
+#         for name in group_names:
+#             feature_group = fs.get_feature_group(name, version=version)
+#             df = feature_group.read()
+#             feature_groups[name] = df
+#             print(f"Feature group '{name}' version {version} fetched successfully.")
+
+#         return feature_groups
+#     except Exception as e:
+#         print(f"Error fetching feature groups: {e}")
+#         raise
+
+def fetch_feature_groups(hopsworks_api_key, group_names, version=1, retries=3, delay=60):
     try:
         project = hopsworks.login(api_key_value=hopsworks_api_key)
+        print("Logged into Hopsworks successfully.")
         fs = project.get_feature_store()
+
         feature_groups = {}
 
         for name in group_names:
-            feature_group = fs.get_feature_group(name, version=version)
-            df = feature_group.read()
-            feature_groups[name] = df
-            print(f"Feature group '{name}' version {version} fetched successfully.")
-
+            attempts = 0
+            while attempts < retries:
+                try:
+                    feature_group = fs.get_feature_group(name=name, version=version)
+                    df = feature_group.read()
+                    feature_groups[name] = df
+                    print(f"Feature group '{name}' version {version} fetched successfully.")
+                    break  # Stop retrying after a successful fetch
+                except hsfs.client.exceptions.RestAPIError as e:
+                    if "ConcurrentAccessTimeoutException" in str(e):
+                        attempts += 1
+                        print(f"Retry {attempts}/{retries} due to lock timeout for feature group '{name}'. Waiting {delay} seconds...")
+                        time.sleep(delay)  # Wait before retrying
+                    else:
+                        print(f"Error fetching feature group '{name}': {e}")
+                        traceback.print_exc()
+                        break
         return feature_groups
     except Exception as e:
-        print(f"Error fetching feature groups: {e}")
+        print(f"General error fetching feature groups: {e}")
+        traceback.print_exc()
         raise

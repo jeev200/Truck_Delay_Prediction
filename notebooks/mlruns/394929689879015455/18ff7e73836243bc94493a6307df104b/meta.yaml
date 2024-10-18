@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/notebooks/mlruns/394929689879015455/18ff7e73836243bc94493a6307df104b/artifacts
+end_time: 1728934204735
+entry_point_name: ''
+experiment_id: '394929689879015455'
+lifecycle_stage: active
+run_id: 18ff7e73836243bc94493a6307df104b
+run_name: capable-auk-759
+run_uuid: 18ff7e73836243bc94493a6307df104b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728934174652
+status: 3
+tags: []
+user_id: jeevanapathipati

@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/notebooks/mlruns/394929689879015455/dc820b95a76a41fcbe86ca1bdd3c558c/artifacts
+end_time: 1728935500874
+entry_point_name: ''
+experiment_id: '394929689879015455'
+lifecycle_stage: active
+run_id: dc820b95a76a41fcbe86ca1bdd3c558c
+run_name: smiling-pig-27
+run_uuid: dc820b95a76a41fcbe86ca1bdd3c558c
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728935498122
+status: 3
+tags: []
+user_id: jeevanapathipati

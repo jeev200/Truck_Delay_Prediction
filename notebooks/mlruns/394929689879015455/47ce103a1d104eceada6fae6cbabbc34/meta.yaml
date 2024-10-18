@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/notebooks/mlruns/394929689879015455/47ce103a1d104eceada6fae6cbabbc34/artifacts
+end_time: 1728937507867
+entry_point_name: ''
+experiment_id: '394929689879015455'
+lifecycle_stage: active
+run_id: 47ce103a1d104eceada6fae6cbabbc34
+run_name: upset-doe-733
+run_uuid: 47ce103a1d104eceada6fae6cbabbc34
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728937485418
+status: 3
+tags: []
+user_id: jeevanapathipati

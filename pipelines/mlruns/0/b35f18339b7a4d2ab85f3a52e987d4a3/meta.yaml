@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/0/b35f18339b7a4d2ab85f3a52e987d4a3/artifacts
+end_time: 1728950008791
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: b35f18339b7a4d2ab85f3a52e987d4a3
+run_name: intelligent-eel-228
+run_uuid: b35f18339b7a4d2ab85f3a52e987d4a3
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1728950007289
+status: 3
+tags: []
+user_id: jeevanapathipati
