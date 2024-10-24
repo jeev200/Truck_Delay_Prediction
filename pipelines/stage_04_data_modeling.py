@@ -10,10 +10,10 @@ from src.utils.feature_group import *
 from src.components.data_modeling import DataModeling
 import logging
 
+# Configure logging
 logging.basicConfig(level=logging.DEBUG,  # Capture all levels of logs
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
-
 
 STAGE_NAME = "Data Modeling"
 
@@ -22,12 +22,12 @@ class DataModelingPipeline:
         logging.debug("Reading configuration settings.")
         self.config = read_config()
         self.hopsworks_api_key = self.config.get('HOPSWORK', 'feature_group_api')
-        self.modeling = DataModeling(hopsworks_api_key=self.hopsworks_api_key)
+        self.model_dir = self.config.get('MODEL','model_dir')
+        self.modeling = DataModeling(hopsworks_api_key=self.hopsworks_api_key,model_dir=self.model_dir)
         logging.info("DataModelingPipeline initialized with Hopsworks API key.")
 
     def main(self):
         logging.info("Starting the main function of the Data Modeling pipeline.")
-        
         
         # Set the MLflow experiment
         mlflow.set_experiment("truck_delay_experiment")
@@ -67,17 +67,10 @@ class DataModelingPipeline:
 
         # Train and evaluate models
         logging.info("Training and evaluating models.")
-        
         models_info = self.modeling.get_model_info()  # Retrieve model configurations
-
-        # Iterate over models and train them
-        for model_name, (model, params) in models_info.items():
-            logging.info(f"Training {model_name} model.")
-            train_report, valid_report, test_report = self.modeling.run_model_training(model, params, model_name, X_train, y_train, X_valid, y_valid, X_test, y_test)
-
-            # logging.info(f"Training for {model_name} completed. Reports: {train_report}, {valid_report}, {test_report}")
-
-
+        
+        # Find and save the best model
+        self.modeling.find_and_save_best_model(models_info, X_train, datasets['y_train'], X_valid, datasets['y_valid'], X_test, datasets['y_test'])
 
 if __name__ == "__main__":
     logging.info(f">>>>>> Stage {STAGE_NAME} starting <<<<<<")
