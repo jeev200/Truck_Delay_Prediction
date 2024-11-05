@@ -11,6 +11,9 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
+# Set page configuration to wide mode
+st.set_page_config(layout="wide")
+
 # Append the parent directory to sys.path to import custom modules
 parent_directory = os.path.abspath(os.path.join(__file__, "../../"))
 sys.path.append(parent_directory)
@@ -29,7 +32,9 @@ logging.info("Configuration read successfully.")
 final_merge = fetch_feature_groups(hopsworks_api_key, group_names).get('final_dataset', pd.DataFrame())
 if final_merge.empty:
     logging.warning("Fetched 'final_dataset' is empty.")
-    st.warning("No data available to display or predict on.")
+else:
+    # Remove 'index' and 'eventtime' columns if they exist in the dataframe
+    final_merge = final_merge.drop(columns=['index', 'eventtime'], errors='ignore')
 
 # Connect to MLflow and load artifacts
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
@@ -47,39 +52,47 @@ encoder = pickle.load(open(encoder_path, 'rb'))
 scaler = pickle.load(open(scaler_path, 'rb'))
 logging.info("Model, encoder, and scaler loaded successfully.")
 
-
-
 cts_cols = [
-        'route_avg_temp', 'route_avg_wind_speed', 'route_avg_precip', 'route_avg_humidity', 
-        'route_avg_visibility', 'route_avg_pressure', 'distance', 'average_hours', 
-        'temp_origin', 'wind_speed_origin', 'precip_origin', 'humidity_origin', 
-        'visibility_origin', 'pressure_origin', 'temp_destination', 'wind_speed_destination', 
-        'precip_destination', 'humidity_destination', 'visibility_destination', 
-        'pressure_destination', 'avg_no_of_vehicles', 'truck_age', 'load_capacity_pounds', 
-        'mileage_mpg', 'age', 'experience', 'average_speed_mph'
-    ]
+    'route_avg_temp', 'route_avg_wind_speed', 'route_avg_precip', 'route_avg_humidity', 
+    'route_avg_visibility', 'route_avg_pressure', 'distance', 'average_hours', 
+    'temp_origin', 'wind_speed_origin', 'precip_origin', 'humidity_origin', 
+    'visibility_origin', 'pressure_origin', 'temp_destination', 'wind_speed_destination', 
+    'precip_destination', 'humidity_destination', 'visibility_destination', 
+    'pressure_destination', 'avg_no_of_vehicles', 'truck_age', 'load_capacity_pounds', 
+    'mileage_mpg', 'age', 'experience', 'average_speed_mph'
+]
+
 cat_cols = [
-        'route_description', 'description_origin', 'description_destination', 
-        'accident', 'fuel_type', 'gender', 'driving_style', 'ratings', 'is_midnight'
-    ]
+    'route_description', 'description_origin', 'description_destination', 
+    'accident', 'fuel_type', 'gender', 'driving_style', 'ratings', 'is_midnight'
+]
+
 encode_columns = ['route_description', 'description_origin', 'description_destination', 'fuel_type', 'gender', 'driving_style']
 
-# Streamlit interface setup
-st.title('Truck Delay Prediction')
-option = st.selectbox('Choose a filter method:', ['Date Range', 'Truck ID', 'Route ID'])
+# Sidebar for inputs
+st.sidebar.title("🚚 Truck Delay Prediction")
+option = st.sidebar.selectbox('Choose a filter method:', ['Date Range', 'Truck ID', 'Route ID'])
 
 # Initialize variables
 from_date = to_date = truck_id = route_id = None
 
-if option == 'Date Range':
-    from_date = pd.Timestamp(st.date_input("Start date", value=pd.to_datetime(final_merge['departure_date']).min()), tz='UTC')
-    to_date = pd.Timestamp(st.date_input("End date", value=pd.to_datetime(final_merge['departure_date']).max()), tz='UTC')
-elif option == 'Truck ID':
-    truck_id = st.selectbox('Select truck ID:', final_merge['truck_id'].unique())
-elif option == 'Route ID':
-    route_id = st.selectbox('Select route ID:', final_merge['route_id'].unique())
+# Placeholder for the prediction results
+prediction_placeholder = st.empty()
+with prediction_placeholder.container():
+    st.image("/Users/jeevanapathipati/Documents/TruckDelay/image.jpg", width=700)  # Ensure the image path is correct
+    st.write("## Predicted Delays will appear here")
+    st.write("Select a filter and predict delays based on Truck ID, Route ID, or Date Range.")
 
-if st.button('Predict Delays'):
+if option == 'Date Range':
+    from_date = pd.Timestamp(st.sidebar.date_input("Start date", value=pd.to_datetime(final_merge['departure_date']).min()), tz='UTC')
+    to_date = pd.Timestamp(st.sidebar.date_input("End date", value=pd.to_datetime(final_merge['departure_date']).max()), tz='UTC')
+elif option == 'Truck ID':
+    truck_id = st.sidebar.selectbox('Select truck ID:', final_merge['truck_id'].unique())
+elif option == 'Route ID':
+    route_id = st.sidebar.selectbox('Select route ID:', final_merge['route_id'].unique())
+
+if st.sidebar.button('Predict Delays'):
+    prediction_placeholder.empty()  # Clear the placeholder before showing new data
     # Conditionally apply filters based on selected option
     filtered_data = pd.DataFrame()
     if option == 'Date Range' and from_date and to_date:
@@ -90,6 +103,9 @@ if st.button('Predict Delays'):
         filtered_data = final_merge[final_merge['route_id'] == route_id]
 
     if not filtered_data.empty:
+        # Reset index before further processing
+        filtered_data.reset_index(drop=True, inplace=True)
+
         # Manual encoding using loaded encoder
         encoded_data = encoder.transform(filtered_data[encode_columns])
         encoded_df = pd.DataFrame(encoded_data, columns=encoder.get_feature_names_out(), index=filtered_data.index)
@@ -107,10 +123,12 @@ if st.button('Predict Delays'):
         
         # Predict using the model
         predictions = model.predict(final_data)
-
+        
         # Prepare final results to display
-        results_df = filtered_data[['truck_id', 'route_id']].copy()
-        results_df['delay'] = predictions
-        st.dataframe(results_df.style.highlight_max(axis=0))
+        results_df = filtered_data.copy()  # Copy all columns from the filtered data
+        results_df['delay'] = predictions  # Append the predictions as a new column
+        st.write(f"### Prediction results based on {option}:")
+        st.dataframe(results_df)  # Display the results without styling
+        st.success(f"{len(filtered_data)} records matched the criteria for {option}.")
     else:
-        st.warning(f"No data found for the selected {option.lower()}.")
+        st.error("No data found for the selected option.")

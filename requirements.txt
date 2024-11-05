@@ -1,9 +1,12 @@
 pandas
 numpy
 matplotlib
-seaborn
 sqlalchemy
 psycopg2-binary
 requests
 scikit-learn==1.5.2
 hopsworks
+mlflow
+xgboost
+hsfs
+logging

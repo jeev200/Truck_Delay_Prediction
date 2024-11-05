@@ -13,7 +13,10 @@ import logging
 import os
 import pickle
 import logging
+import time
 import mlflow.sklearn
+from mlflow.exceptions import MlflowException
+from mlflow.tracking import MlflowClient
 
 
 # Configure logging at the top of your script
@@ -249,7 +252,7 @@ class DataModeling:
 
         else:
             logging.warning("No model was selected as the best model.")
-
+    
     def save_and_log_model(self, best_model_name, model_details, X_train):
         # Define local file paths for saving
         model_dir = self.model_dir  # Ensure this is defined or passed appropriately
@@ -268,10 +271,11 @@ class DataModeling:
 
             # Log details with MLflow
             self.log_model_to_mlflow(model_details, best_model_name, X_train, model_file, encoder_file, scaler_file)
-
+        
         except Exception as e:
             logging.error(f"An error occurred while saving and logging model artifacts: {e}", exc_info=True)
             raise
+    
 
     def log_model_to_mlflow(self, model_details, best_model_name, X_train, model_file, encoder_file, scaler_file):
         with mlflow.start_run(run_name=f"Best Model - {best_model_name}"):

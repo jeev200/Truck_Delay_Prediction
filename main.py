@@ -10,6 +10,7 @@ sys.path.append(parent_directory)
 from pipelines.stage_01_data_ingestion import DataIngestionPipeline
 from pipelines.stage_02_data_cleaning import DataIngestionAndCleaning
 from pipelines.stage_03_data_merging import DataProcessingPipeline
+from pipelines.stage_04_data_modeling import DataModelingPipeline
 
 def run_pipeline(stage_name, pipeline):
     try:
@@ -25,3 +26,4 @@ if __name__ == "__main__":
     run_pipeline("Data Ingestion", DataIngestionPipeline())
     run_pipeline("Data Cleaning", DataIngestionAndCleaning())
     run_pipeline("Data Preparation", DataProcessingPipeline())
+    run_pipeline("Data Modeling", DataModelingPipeline())
