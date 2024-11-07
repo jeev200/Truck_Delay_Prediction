@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1729809016650
+current_stage: Deleted_Internal
+description: null
+last_updated_timestamp: 1729809016670
+name: Random_Forest
+run_id: 1c0f771c1ced43d6b8874e3cb5141ee5
+run_link: null
+source: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/401338667180179893/1c0f771c1ced43d6b8874e3cb5141ee5/artifacts/model
+status: READY
+status_message: null
+storage_location: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/401338667180179893/1c0f771c1ced43d6b8874e3cb5141ee5/artifacts/model
+user_id: null
+version: 1

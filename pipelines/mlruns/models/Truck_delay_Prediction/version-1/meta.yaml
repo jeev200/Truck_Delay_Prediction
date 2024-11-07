@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1729634088659
+current_stage: Staging
+description: ''
+last_updated_timestamp: 1729634108119
+name: Truck_delay_Prediction
+run_id: 588d4b9f39b54b25ae6ff4e63dfe3daa
+run_link: ''
+source: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/401338667180179893/588d4b9f39b54b25ae6ff4e63dfe3daa/artifacts/XGBoost
+status: READY
+status_message: null
+storage_location: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/401338667180179893/588d4b9f39b54b25ae6ff4e63dfe3daa/artifacts/XGBoost
+user_id: null
+version: 1

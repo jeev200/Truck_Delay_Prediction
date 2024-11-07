@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1729561315890
+current_stage: Staging
+description: ''
+last_updated_timestamp: 1729620513757
+name: TruckDelayPrediction
+run_id: 31dda07e03d5483895b00f6ae8db7171
+run_link: ''
+source: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/401338667180179893/31dda07e03d5483895b00f6ae8db7171/artifacts/Random_Forest
+status: READY
+status_message: null
+storage_location: file:///Users/jeevanapathipati/Documents/TruckDelay/pipelines/mlruns/401338667180179893/31dda07e03d5483895b00f6ae8db7171/artifacts/Random_Forest
+user_id: null
+version: 1
