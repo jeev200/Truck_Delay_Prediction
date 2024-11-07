@@ -3,8 +3,6 @@ import sys
 import pandas as pd
 import streamlit as st
 import pickle
-from mlflow.tracking import MlflowClient
-import mlflow.pyfunc
 import logging
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
@@ -33,25 +31,21 @@ final_merge = fetch_feature_groups(hopsworks_api_key, group_names).get('final_da
 if final_merge.empty:
     logging.warning("Fetched 'final_dataset' is empty.")
 else:
-    # Remove 'index' and 'eventtime' columns if they exist in the dataframe
     final_merge = final_merge.drop(columns=['index', 'eventtime'], errors='ignore')
 
-# Connect to MLflow and load artifacts
-mlflow.set_tracking_uri("http://127.0.0.1:5000")
-client = MlflowClient()
-model_name = "Truck_delay_Prediction"
-stage = "Staging"
-latest_version = client.get_latest_versions(model_name)[0]
-run_id = latest_version.run_id
-artifact_location = client.get_run(run_id).info.artifact_uri.replace("file://", "")
-encoder_path = os.path.join(artifact_location, "encoder", "XGBoost_encoder.pkl")
-scaler_path = os.path.join(artifact_location, "scaler", "XGBoost_scaler.pkl")
-model_uri = f"models:/{model_name}/{stage}"
-model = mlflow.pyfunc.load_model(model_uri)
-encoder = pickle.load(open(encoder_path, 'rb'))
-scaler = pickle.load(open(scaler_path, 'rb'))
+# Paths from the config.ini for model, encoder, and scaler
+model_dir = config['MLFLOW']['model_dir']
+encoder_dir = config['MLFLOW']['encoder_dir']
+scaler_dir = config['MLFLOW']['scalar_dir']
+
+# Load model, encoder, and scaler
+model = pickle.load(open(os.path.join(model_dir, "model.pkl"), 'rb'))
+encoder = pickle.load(open(os.path.join(encoder_dir, "XGBoost_encoder.pkl"), 'rb'))
+scaler = pickle.load(open(os.path.join(scaler_dir, "XGBoost_scaler.pkl"), 'rb'))
+
 logging.info("Model, encoder, and scaler loaded successfully.")
 
+# Define continuous and categorical columns
 cts_cols = [
     'route_avg_temp', 'route_avg_wind_speed', 'route_avg_precip', 'route_avg_humidity', 
     'route_avg_visibility', 'route_avg_pressure', 'distance', 'average_hours', 
@@ -79,7 +73,7 @@ from_date = to_date = truck_id = route_id = None
 # Placeholder for the prediction results
 prediction_placeholder = st.empty()
 with prediction_placeholder.container():
-    st.image("/Users/jeevanapathipati/Documents/TruckDelay/image.jpg", width=700)  # Ensure the image path is correct
+    st.image("/app/image.jpg", width=700)  # Ensure the image path is correct
     st.write("## Predicted Delays will appear here")
     st.write("Select a filter and predict delays based on Truck ID, Route ID, or Date Range.")
 
@@ -112,16 +106,15 @@ if st.sidebar.button('Predict Delays'):
         
         # Combine with unencoded categorical data
         other_cat_data = filtered_data[[col for col in cat_cols if col not in encode_columns]]
-        full_cat_data = pd.concat([encoded_df, other_cat_data], axis=1)
+        full_cat_data = pd.concat([other_cat_data, encoded_df ], axis=1)
         
         # Scaling continuous columns using loaded scaler
         scaled_data = scaler.transform(filtered_data[cts_cols])
         scaled_df = pd.DataFrame(scaled_data, columns=cts_cols, index=filtered_data.index)
         
         # Combine categorical and continuous data for model prediction
-        final_data = pd.concat([full_cat_data, scaled_df], axis=1)
+        final_data = pd.concat([scaled_df, full_cat_data], axis=1)
         
-        # Predict using the model
         predictions = model.predict(final_data)
         
         # Prepare final results to display

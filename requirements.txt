@@ -10,3 +10,4 @@ mlflow
 xgboost
 hsfs
 logging
+streamlit
