@@ -1,25 +1,25 @@
-name : CICD pipeline for truck delay application
+name: CICD pipeline for truck delay application
 
 on:
   push:
     branches:
-      -main
+      - main
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name : checkout the code
-        uses : actions/checkout@v3
-        with :
+      - name: checkout the code
+        uses: actions/checkout@v3
+        with:
           lfs: true
 
-      - name : install Git lfs
-        run : git lfs install
+      - name: install Git lfs
+        run: git lfs install
 
-      - name : Build Docker Image
-        run : docker build --no-cache -t truck_delay_app .
+      - name: Build Docker Image
+        run: docker build --no-cache -t truck_delay_app .
 
       - name: Authenticate Docker with AWS ECR
         env:
@@ -37,9 +37,9 @@ jobs:
         run: docker system prune -f
 
   deploy:
-    needs : build
-    runs-on : ubuntu-latest
-    steps : 
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Authenticate Docker with AWS ECR
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -57,4 +57,3 @@ jobs:
 
       - name: Notify deployment success
         run: echo "Deployment to ECS was successful."
-
