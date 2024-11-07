@@ -53,7 +53,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: us-east-2
         run: |
-          aws ecs update-service --cluster truck-delay-cluster --service truck-delay-service --force-new-deployment --region $AWS_REGION
+          aws ecs update-service --cluster truck_delay_cluster --service truck-delay-service --force-new-deployment --region $AWS_REGION
 
       - name: Notify Deployment Success
         run: echo "Deployment to ECS was successful."
