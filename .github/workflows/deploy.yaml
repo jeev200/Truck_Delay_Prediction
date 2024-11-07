@@ -10,12 +10,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout the code
+      - name: Checkout the code
         uses: actions/checkout@v3
         with:
           lfs: true
 
-      - name: install Git lfs
+      - name: Install Git LFS
         run: git lfs install
 
       - name: Build Docker Image
@@ -26,14 +26,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 148761649452.dkr.ecr.us-east-2.amazonaws.com
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 148761649452.dkr.ecr.us-east-2.amazonaws.com
 
-      - name: Push Docker image to ECR
+      - name: Push Docker Image to ECR
         run: |
           docker tag truck_delay_app:latest 148761649452.dkr.ecr.us-east-2.amazonaws.com/truck/truck_delay:latest
           docker push 148761649452.dkr.ecr.us-east-2.amazonaws.com/truck/truck_delay:latest
 
-      - name: Remove unused Docker layers
+      - name: Remove Unused Docker Layers
         run: docker system prune -f
 
   deploy:
@@ -45,15 +45,15 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 148761649452.dkr.ecr.us-east-2.amazonaws.com
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 148761649452.dkr.ecr.us-east-2.amazonaws.com
 
       - name: Deploy to AWS ECS
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-1
+          AWS_REGION: us-east-2
         run: |
           aws ecs update-service --cluster truck-delay-cluster --service truck-delay-service --force-new-deployment --region $AWS_REGION
 
-      - name: Notify deployment success
+      - name: Notify Deployment Success
         run: echo "Deployment to ECS was successful."
